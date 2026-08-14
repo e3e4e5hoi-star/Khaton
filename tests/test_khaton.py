@@ -6,7 +6,7 @@ from khaton.runtime import KhatonRuntime
 from khaton.stdlib import LIBRARIES, load_library
 
 def test_command_and_library_contracts():
-    assert len(COMMANDS) == 38
+    assert len(COMMANDS) == 39
     assert len(LIBRARIES) == 17
     for name in LIBRARIES: assert load_library(name)
 
@@ -27,6 +27,19 @@ def test_const_and_if_else_regressions():
         assert False
     except RuntimeError as exc:
         assert 'constant x cannot be reassigned' in str(exc)
+
+def test_try_catch_finally():
+    source = 'try begin\nassert 0\ntry catch as error\nprint error\ntry finally\nprint done\ntry end'
+    runtime = KhatonRuntime().run(parse(source))
+    assert runtime.output[0].startswith('line 2: assertion failed')
+    assert runtime.output[1] == 'done'
+
+def test_try_without_catch_propagates():
+    try:
+        KhatonRuntime().run(parse('try begin\nassert 0\ntry end'))
+        assert False
+    except RuntimeError as exc:
+        assert 'assertion failed' in str(exc)
 
 def test_bytecode_round_trip():
     program = compile_source('let x = 4\nadd y x 2\nprint y')

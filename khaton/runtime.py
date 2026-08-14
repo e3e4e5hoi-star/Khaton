@@ -5,6 +5,37 @@ from .stdlib import load_library
 
 class KhatonRuntime:
     def __init__(self): self.env = {}; self.constants = set(); self.output = []; self.events = []
+    def _run_try(self, statements, start: int):
+        catch_at = finally_at = end_at = None
+        depth = 0
+        for index in range(start + 1, len(statements)):
+            args = statements[index].args
+            if statements[index].command == 'try':
+                mode = args[0] if args else ''
+                if mode == 'begin': depth += 1
+                elif mode == 'end':
+                    if depth: depth -= 1
+                    else: end_at = index; break
+                elif depth == 0 and mode == 'catch': catch_at = index
+                elif depth == 0 and mode == 'finally': finally_at = index
+        if end_at is None: raise SyntaxError('try block requires try end')
+        if catch_at is not None and finally_at is not None and catch_at > finally_at: raise SyntaxError('try catch must precede try finally')
+        body_end = min(x for x in (catch_at, finally_at, end_at) if x is not None)
+        caught = None
+        try: self.run(statements[start + 1:body_end])
+        except RuntimeError as exc:
+            caught = exc
+            if catch_at is not None:
+                catch_end = finally_at if finally_at is not None else end_at
+                catch_args = statements[catch_at].args
+                if len(catch_args) >= 3 and catch_args[1] == 'as': self.env[catch_args[2]] = str(exc)
+                elif len(catch_args) >= 2: self.env[catch_args[1]] = str(exc)
+                self.run(statements[catch_at + 1:catch_end])
+            else: raise
+        finally:
+            if finally_at is not None: self.run(statements[finally_at + 1:end_at])
+        return end_at
+
     @staticmethod
     def _jump_to(statements, pc, targets):
         depth = 0
@@ -44,6 +75,9 @@ class KhatonRuntime:
                     if not bool(self.value(a[0])): raise AssertionError('assertion failed')
                 elif c == 'emit': self.events.append({'event': a[0], 'payload': [self.value(x) for x in a[1:]]})
                 elif c == 'sleep': time.sleep(float(self.value(a[0])))
+                elif c == 'try':
+                    if not a or a[0] != 'begin': raise ValueError('use try begin, try catch [as name], try finally, try end')
+                    pc = self._run_try(statements, pc)
                 elif c == 'import': self.env[a[0]] = load_library(a[0])
                 elif c == 'if':
                     if not a: raise ValueError('if requires a condition')

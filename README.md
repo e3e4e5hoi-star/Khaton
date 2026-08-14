@@ -4,11 +4,11 @@ Khaton is a compact experimental programming language inspired by the explicit, 
 
 > Khaton is an educational language implementation. It is not a drop-in replacement for C++ or F#, and it does not claim native-machine performance yet.
 
-## 38 commands
+## 39 commands
 
-`let`, `const`, `print`, `input`, `if`, `else`, `end`, `repeat`, `while`, `fn`, `return`, `call`, `import`, `match`, `case`, `break`, `continue`, `assert`, `type`, `struct`, `enum`, `new`, `delete`, `set`, `get`, `add`, `sub`, `mul`, `div`, `mod`, `eq`, `lt`, `gt`, `and`, `or`, `not`, `emit`, and `sleep`.
+`let`, `const`, `print`, `input`, `if`, `else`, `end`, `repeat`, `while`, `fn`, `return`, `call`, `import`, `match`, `case`, `break`, `continue`, `assert`, `type`, `struct`, `enum`, `new`, `delete`, `set`, `get`, `add`, `sub`, `mul`, `div`, `mod`, `eq`, `lt`, `gt`, `and`, `or`, `not`, `emit`, `sleep`, and `try`.
 
-The core executable semantics cover immutable constants, variable binding, output, input, arithmetic and boolean operations, assertions, imports, if/else blocks, bounded repeat loops, event emission, sleep, basic object storage and bytecode compilation. The remaining reserved commands are part of the forward-compatible grammar and produce explicit behavior or safe no-op semantics while the language grows.
+The core executable semantics cover immutable constants, variable binding, output, input, arithmetic and boolean operations, assertions, imports, if/else blocks, bounded repeat loops, event emission, sleep, basic object storage, bytecode compilation, and structured exception handling. The remaining reserved commands are part of the forward-compatible grammar and produce explicit behavior or safe no-op semantics while the language grows.
 
 ## 17 standard libraries
 
@@ -53,7 +53,23 @@ python -m pip install -e '.[dev]'
 python -m pytest
 ```
 
-The regression suite covers constants, conditional blocks, bytecode validation, parser comments and both execution paths.
+The regression suite covers constants, conditional blocks, bytecode validation, parser comments, exception handling and both execution paths.
+
+## Exception handling
+
+Khaton uses one command family, `try`, with explicit modes. The `try begin` block is executed normally; `try catch as name` receives a caught runtime error; `try finally` always executes; and `try end` closes the construct.
+
+```khaton
+try begin
+  assert 0
+try catch as error
+  print error
+try finally
+  print cleanup
+try end
+```
+
+Exceptions that are not caught are re-raised with the source line number. The construct is also supported by the bytecode path because bytecode stores the same statements.
 
 The implementation is intentionally small and testable. Future work includes a typed AST, real pattern matching, closures, a register-based VM, native extensions, package resolution and static analysis.
 
