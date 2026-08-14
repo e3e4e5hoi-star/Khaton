@@ -21,8 +21,16 @@ jobs:
       - name: Build standalone EXE
         shell: pwsh
         run: pyinstaller --noconfirm --clean --onefile --windowed --name KhatonStudio --paths . --hidden-import khaton --hidden-import khaton.bytecode --hidden-import khaton.lexer --hidden-import khaton.parser --hidden-import khaton.runtime --hidden-import khaton.stdlib --add-data "studio/assets;studio/assets" khaton_studio.py
-      - name: Upload EXE artifact
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+      - name: Build installer
+        shell: pwsh
+        run: '& "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" installer\\KhatonStudio.iss'
+      - name: Upload Windows EXE and Setup artifacts
         uses: actions/upload-artifact@v4
         with:
           name: KhatonStudio-Windows
-          path: dist/KhatonStudio.exe
+          path: |
+            dist/KhatonStudio.exe
+            installer-output/KhatonStudio-Setup.exe
