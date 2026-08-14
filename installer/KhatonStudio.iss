@@ -10,7 +10,7 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\Khaton Studio
 DefaultGroupName={#MyAppName}
-OutputDir=installer-output
+OutputDir=..\installer-output
 OutputBaseFilename=KhatonStudio-Setup
 Compression=lzma2
 SolidCompression=yes
@@ -20,7 +20,7 @@ PrivilegesRequired=admin
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Files]
-Source: "dist\KhatonStudio.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\KhatonStudio.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\Khaton Studio"; Filename: "{app}\{#MyAppExeName}"
