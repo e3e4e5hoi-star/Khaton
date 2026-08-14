@@ -1,0 +1,28 @@
+name: Build Khaton Studio for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'studio-v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build tools
+        run: python -m pip install --upgrade pip pyinstaller pillow
+      - name: Build standalone EXE
+        shell: pwsh
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name KhatonStudio --add-data "studio/assets;studio/assets" studio/khaton_studio.py
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KhatonStudio-Windows
+          path: dist/KhatonStudio.exe
