@@ -4,7 +4,18 @@ from .parser import Statement
 from .stdlib import load_library
 
 class KhatonRuntime:
-    def __init__(self): self.env = {}; self.output = []; self.events = []
+    def __init__(self): self.env = {}; self.constants = set(); self.output = []; self.events = []
+    @staticmethod
+    def _jump_to(statements, pc, targets):
+        depth = 0
+        for index in range(pc + 1, len(statements)):
+            command = statements[index].command
+            if command in {'if', 'while', 'repeat', 'fn'}: depth += 1
+            elif command == 'end':
+                if depth == 0: return index
+                depth -= 1
+            elif command == 'else' and depth == 0 and targets == {'else'}: return index
+        return len(statements)
     def value(self, text: str):
         if text in self.env: return self.env[text]
         try: return ast.literal_eval(text)
@@ -16,26 +27,38 @@ class KhatonRuntime:
             try:
                 if c in {'let','const'}:
                     if len(a) < 3 or a[1] != '=': raise ValueError('syntax: let name = value')
+                    if a[0] in self.constants: raise ValueError(f'constant {a[0]} cannot be reassigned')
                     self.env[a[0]] = self.value(' '.join(a[2:]))
+                    if c == 'const': self.constants.add(a[0])
                 elif c == 'print': self.output.append(' '.join(str(self.value(x)) for x in a))
                 elif c == 'input': self.env[a[0]] = input(' '.join(a[1:]))
                 elif c in {'add','sub','mul','div','mod','eq','lt','gt','and','or'}:
                     if len(a) != 3: raise ValueError(f'{c} requires target left right')
                     x, y = self.value(a[1]), self.value(a[2]); ops={'add':lambda:x+y,'sub':lambda:x-y,'mul':lambda:x*y,'div':lambda:x/y,'mod':lambda:x%y,'eq':lambda:x==y,'lt':lambda:x<y,'gt':lambda:x>y,'and':lambda:bool(x) and bool(y),'or':lambda:bool(x) or bool(y)}; self.env[a[0]]=ops[c]()
                 elif c == 'not': self.env[a[0]] = not bool(self.value(a[1]))
-                elif c == 'set': self.env[a[0]] = self.value(' '.join(a[2:])) if len(a)>2 and a[1]=='=' else self.value(a[1])
+                elif c == 'set':
+                    if a[0] in self.constants: raise ValueError(f'constant {a[0]} cannot be reassigned')
+                    self.env[a[0]] = self.value(' '.join(a[2:])) if len(a)>2 and a[1]=='=' else self.value(a[1])
                 elif c == 'get': self.output.append(str(self.env.get(a[0], None)))
                 elif c == 'assert':
                     if not bool(self.value(a[0])): raise AssertionError('assertion failed')
                 elif c == 'emit': self.events.append({'event': a[0], 'payload': [self.value(x) for x in a[1:]]})
                 elif c == 'sleep': time.sleep(float(self.value(a[0])))
                 elif c == 'import': self.env[a[0]] = load_library(a[0])
-                elif c == 'repeat': repeat_stack.append((pc, int(self.value(a[0]))))
+                elif c == 'if':
+                    if not a: raise ValueError('if requires a condition')
+                    if not bool(self.value(a[0])): pc = self._jump_to(statements, pc, {'else'})
+                elif c == 'else': pc = self._jump_to(statements, pc, set())
+                elif c == 'repeat':
+                    if not a or int(self.value(a[0])) < 0: raise ValueError('repeat requires a non-negative count')
+                    repeat_stack.append((pc, int(self.value(a[0]))))
                 elif c == 'end' and repeat_stack:
                     start, remaining = repeat_stack[-1]
                     if remaining > 1: repeat_stack[-1] = (start, remaining-1); pc = start
                     else: repeat_stack.pop()
-                elif c in {'if','while','fn','return','call','export','match','case','break','continue','type','struct','enum','new','delete','else'}:
+                elif c == 'end':
+                    pass
+                elif c in {'while','fn','return','call','match','case','break','continue','type','struct','enum','new','delete'}:
                     if c == 'return': self.env['_return'] = self.value(a[0]) if a else None
                     elif c == 'break': break
                     elif c == 'delete': self.env.pop(a[0], None)

@@ -12,6 +12,9 @@ def save_bytecode(program: dict, path: str):
 def load_bytecode(path: str) -> dict:
     with open(path, encoding='utf-8') as f: program = json.load(f)
     if program.get('version') != 1 or not isinstance(program.get('instructions'), list): raise ValueError('invalid Khaton bytecode')
+    for instruction in program['instructions']:
+        if not isinstance(instruction, dict) or instruction.get('op') not in __import__('khaton.lexer', fromlist=['COMMANDS']).COMMANDS or not isinstance(instruction.get('args'), list) or not isinstance(instruction.get('line'), int):
+            raise ValueError('invalid Khaton instruction')
     return program
 
 def run_bytecode(program: dict):

@@ -8,7 +8,7 @@ Khaton is a compact experimental programming language inspired by the explicit, 
 
 `let`, `const`, `print`, `input`, `if`, `else`, `end`, `repeat`, `while`, `fn`, `return`, `call`, `import`, `match`, `case`, `break`, `continue`, `assert`, `type`, `struct`, `enum`, `new`, `delete`, `set`, `get`, `add`, `sub`, `mul`, `div`, `mod`, `eq`, `lt`, `gt`, `and`, `or`, `not`, `emit`, and `sleep`.
 
-The core executable semantics currently cover variable binding, output, input, arithmetic and boolean operations, assertions, imports, bounded repeat loops, event emission, sleep, basic object storage and bytecode compilation. The remaining reserved commands are part of the forward-compatible grammar and produce explicit behavior or safe no-op semantics while the language grows.
+The core executable semantics cover immutable constants, variable binding, output, input, arithmetic and boolean operations, assertions, imports, if/else blocks, bounded repeat loops, event emission, sleep, basic object storage and bytecode compilation. The remaining reserved commands are part of the forward-compatible grammar and produce explicit behavior or safe no-op semantics while the language grows.
 
 ## 17 standard libraries
 
@@ -52,6 +52,8 @@ source .venv/bin/activate
 python -m pip install -e '.[dev]'
 python -m pytest
 ```
+
+The regression suite covers constants, conditional blocks, bytecode validation, parser comments and both execution paths.
 
 The implementation is intentionally small and testable. Future work includes a typed AST, real pattern matching, closures, a register-based VM, native extensions, package resolution and static analysis.
 
