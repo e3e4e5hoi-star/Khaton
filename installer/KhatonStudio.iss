@@ -1,5 +1,5 @@
 #define MyAppName "Khaton Studio"
-#define MyAppVersion "0.2.0"
+#define MyAppVersion "0.3.0"
 #define MyAppPublisher "e3e4e5hoi-star"
 #define MyAppExeName "KhatonStudio.exe"
 

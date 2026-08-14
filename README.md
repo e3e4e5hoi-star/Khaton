@@ -46,7 +46,7 @@ emit calculation answer
 
 ## Khaton Studio desktop app
 
-Khaton Studio is a lightweight Tkinter desktop editor included in `studio/`. It provides line numbers, colored Khaton commands, colored numbers and strings, the submitted camel logo, file open/save, direct Run, bytecode Compile, and an output/diagnostics panel. The latest Studio also includes syntax-only checking, running the selected code, and live cursor line/column status.
+Khaton Studio is a lightweight Tkinter desktop editor included in `studio/`. It provides line numbers, colored Khaton commands, colored numbers and strings, the submitted camel logo, file open/save, direct Run, bytecode Compile, and an output/diagnostics panel. The latest Studio also includes syntax-only checking, running the selected code, live cursor line/column status, and a **Find & Replace** dialog with Find Next, Replace, and Replace All operations. The dialog is available from the toolbar or with `Ctrl+F`.
 
 Run it from the source tree on Windows, Linux or macOS:
 
@@ -54,7 +54,7 @@ Run it from the source tree on Windows, Linux or macOS:
 python studio/khaton_studio.py
 ```
 
-On Windows, the standalone `KhatonStudio.exe` is built by the GitHub Actions workflow `.github/workflows/build-studio-windows.yml`. The build uses the repository-root launcher and explicit Khaton hidden imports so the packaged EXE includes the `khaton` runtime and does not fail with `No module named khaton`. Open the repository's **Actions** tab, run **Build Khaton Studio for Windows**, then download the `KhatonStudio-Windows` artifact. To build from a tag, push a tag such as `studio-v0.2.0`; the workflow will create the same Windows artifact.
+On Windows, the standalone `KhatonStudio.exe` is built by the GitHub Actions workflow `.github/workflows/build-studio-windows.yml`. The build uses the repository-root launcher and a PyInstaller spec that collects the complete Khaton runtime, so the packaged EXE includes the `khaton` package and does not fail with `No module named khaton`. The workflow also creates `KhatonStudio-Setup.exe` with Inno Setup. Open the repository's **Actions** tab, run **Build Khaton Studio for Windows**, then download the `KhatonStudio-Windows` artifact. To build from a tag, push a tag such as `studio-v0.2.0`; the workflow will create the same Windows artifact.
 
 ## Installation and tests
 
@@ -84,6 +84,10 @@ try end
 Exceptions that are not caught are re-raised with the source line number. The construct is also supported by the bytecode path because bytecode stores the same statements.
 
 The implementation is intentionally small and testable. Future work includes a typed AST, real pattern matching, closures, a register-based VM, native extensions, package resolution and static analysis.
+
+## Creator
+
+The project is maintained by [e3e4e5hoi-star](https://github.com/e3e4e5hoi-star). Visit the [Khaton GitHub repository](https://github.com/e3e4e5hoi-star/Khaton) for source code, releases, issues, and the latest Studio builds.
 
 ## License
 

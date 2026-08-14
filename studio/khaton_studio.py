@@ -70,7 +70,7 @@ class KhatonStudio(tk.Tk):
         tk.Label(title, text="Khaton Studio", fg=TEXT, bg=BG, font=("Segoe UI", 21, "bold")).pack(anchor="w")
         tk.Label(title, text="A colorful editor for the Khaton language", fg=MUTED, bg=BG, font=("Segoe UI", 10)).pack(anchor="w")
         toolbar = tk.Frame(header, bg=BG); toolbar.pack(side="right", pady=8)
-        for label, command in (("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Check", self.check_syntax), ("Run ▶", self.run_code), ("Run Selection", self.run_selection), ("Compile", self.compile_code)):
+        for label, command in (("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Find & Replace", self.find_replace), ("Check", self.check_syntax), ("Run ▶", self.run_code), ("Run Selection", self.run_selection), ("Compile", self.compile_code)):
             ttk.Button(toolbar, text=label, command=command).pack(side="left", padx=3)
         body = tk.PanedWindow(self, orient="vertical", sashrelief="flat", bg=BG, borderwidth=0)
         body.pack(fill="both", expand=True, padx=18, pady=5)
@@ -81,7 +81,7 @@ class KhatonStudio(tk.Tk):
         self.editor.pack(side="left", fill="both", expand=True)
         scroll = ttk.Scrollbar(editor_frame, orient="vertical", command=self._scroll_editor); scroll.pack(side="right", fill="y")
         self.editor.configure(yscrollcommand=lambda *args: (scroll.set(*args), self.lines.redraw()))
-        self.editor.bind("<KeyRelease>", self._on_editor_change); self.editor.bind("<Configure>", self.lines.redraw); self.editor.bind("<MouseWheel>", self.lines.redraw); self.editor.bind("<ButtonRelease-1>", self._update_cursor_status); self.editor.bind("<Control-r>", lambda _: self.run_code()); self.editor.bind("<F5>", lambda _: self.run_code())
+        self.editor.bind("<KeyRelease>", self._on_editor_change); self.editor.bind("<Configure>", self.lines.redraw); self.editor.bind("<MouseWheel>", self.lines.redraw); self.editor.bind("<ButtonRelease-1>", self._update_cursor_status); self.editor.bind("<Control-r>", lambda _: self.run_code()); self.editor.bind("<F5>", lambda _: self.run_code()); self.editor.bind("<Control-f>", lambda _: self.find_replace())
         body.add(editor_frame, minsize=260)
         output_frame = tk.Frame(body, bg=PANEL)
         tk.Label(output_frame, text="Output / diagnostics", bg=PANEL, fg=MUTED, anchor="w").pack(fill="x", padx=10, pady=(7, 2))
@@ -111,6 +111,44 @@ class KhatonStudio(tk.Tk):
         path = Path(selected) if selected else None
         if path is not None:
             self.current_file = Path(path); self.current_file.write_text(self.editor.get("1.0", "end-1c"), encoding="utf-8"); self.status.config(text=f"Saved {self.current_file.name}")
+    def find_replace(self):
+        dialog = tk.Toplevel(self)
+        dialog.title("Find & Replace")
+        dialog.configure(bg=PANEL)
+        dialog.resizable(False, False)
+        dialog.transient(self)
+        fields = tk.Frame(dialog, bg=PANEL); fields.pack(fill="x", padx=14, pady=14)
+        tk.Label(fields, text="Find", bg=PANEL, fg=TEXT).grid(row=0, column=0, sticky="w", pady=4)
+        find_entry = ttk.Entry(fields, width=36); find_entry.grid(row=0, column=1, padx=(10, 0), pady=4)
+        tk.Label(fields, text="Replace with", bg=PANEL, fg=TEXT).grid(row=1, column=0, sticky="w", pady=4)
+        replace_entry = ttk.Entry(fields, width=36); replace_entry.grid(row=1, column=1, padx=(10, 0), pady=4)
+        buttons = tk.Frame(dialog, bg=PANEL); buttons.pack(fill="x", padx=14, pady=(0, 14))
+        def find_next():
+            needle = find_entry.get()
+            if not needle: return
+            start = self.editor.search(needle, self.editor.index("insert"), stopindex="end") or self.editor.search(needle, "1.0", stopindex="end")
+            if start:
+                end = f"{start}+{len(needle)}c"
+                self.editor.tag_remove("sel", "1.0", "end"); self.editor.tag_add("sel", start, end); self.editor.mark_set("insert", end); self.editor.see(start); self._update_cursor_status()
+            else: self.status.config(text=f"Not found: {needle}", fg=ERROR)
+        def replace_one():
+            try:
+                start, end = self.editor.index("sel.first"), self.editor.index("sel.last")
+                if self.editor.get(start, end) == find_entry.get(): self.editor.delete(start, end); self.editor.insert(start, replace_entry.get()); self._highlight()
+            except tk.TclError:
+                pass
+            find_next()
+        def replace_all():
+            needle, replacement = find_entry.get(), replace_entry.get()
+            if not needle: return
+            content = self.editor.get("1.0", "end-1c"); count = content.count(needle)
+            if count: self.editor.delete("1.0", "end"); self.editor.insert("1.0", content.replace(needle, replacement)); self._highlight()
+            self._write_output(f"Replaced {count} occurrence(s)")
+        ttk.Button(buttons, text="Find Next", command=find_next).pack(side="left", padx=3)
+        ttk.Button(buttons, text="Replace", command=replace_one).pack(side="left", padx=3)
+        ttk.Button(buttons, text="Replace All", command=replace_all).pack(side="left", padx=3)
+        ttk.Button(buttons, text="Close", command=dialog.destroy).pack(side="right", padx=3)
+        find_entry.focus_set()
     def _write_output(self, text, error=False):
         self.output.configure(state="normal"); self.output.delete("1.0", "end"); self.output.insert("1.0", text); self.output.configure(state="disabled"); self.status.config(text="Error" if error else "Finished", fg=ERROR if error else GREEN)
     def check_syntax(self):
