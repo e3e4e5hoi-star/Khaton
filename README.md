@@ -46,7 +46,7 @@ emit calculation answer
 
 ## Khaton Studio desktop app
 
-Khaton Studio is a lightweight Tkinter desktop editor included in `studio/`. It provides line numbers, colored Khaton commands, colored numbers and strings, the submitted camel logo, file open/save, direct Run, bytecode Compile, and an output/diagnostics panel.
+Khaton Studio is a lightweight Tkinter desktop editor included in `studio/`. It provides line numbers, colored Khaton commands, colored numbers and strings, the submitted camel logo, file open/save, direct Run, bytecode Compile, and an output/diagnostics panel. The latest Studio also includes syntax-only checking, running the selected code, and live cursor line/column status.
 
 Run it from the source tree on Windows, Linux or macOS:
 
@@ -54,7 +54,7 @@ Run it from the source tree on Windows, Linux or macOS:
 python studio/khaton_studio.py
 ```
 
-On Windows, the standalone `KhatonStudio.exe` is built by the GitHub Actions workflow `.github/workflows/build-studio-windows.yml`. Open the repository's **Actions** tab, run **Build Khaton Studio for Windows**, then download the `KhatonStudio-Windows` artifact. To build from a tag, push a tag such as `studio-v0.2.0`; the workflow will create the same Windows artifact.
+On Windows, the standalone `KhatonStudio.exe` is built by the GitHub Actions workflow `.github/workflows/build-studio-windows.yml`. The build uses the repository-root launcher and explicit Khaton hidden imports so the packaged EXE includes the `khaton` runtime and does not fail with `No module named khaton`. Open the repository's **Actions** tab, run **Build Khaton Studio for Windows**, then download the `KhatonStudio-Windows` artifact. To build from a tag, push a tag such as `studio-v0.2.0`; the workflow will create the same Windows artifact.
 
 ## Installation and tests
 

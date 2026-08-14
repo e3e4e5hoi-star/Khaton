@@ -70,7 +70,7 @@ class KhatonStudio(tk.Tk):
         tk.Label(title, text="Khaton Studio", fg=TEXT, bg=BG, font=("Segoe UI", 21, "bold")).pack(anchor="w")
         tk.Label(title, text="A colorful editor for the Khaton language", fg=MUTED, bg=BG, font=("Segoe UI", 10)).pack(anchor="w")
         toolbar = tk.Frame(header, bg=BG); toolbar.pack(side="right", pady=8)
-        for label, command in (("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Run ▶", self.run_code), ("Compile", self.compile_code)):
+        for label, command in (("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Check", self.check_syntax), ("Run ▶", self.run_code), ("Run Selection", self.run_selection), ("Compile", self.compile_code)):
             ttk.Button(toolbar, text=label, command=command).pack(side="left", padx=3)
         body = tk.PanedWindow(self, orient="vertical", sashrelief="flat", bg=BG, borderwidth=0)
         body.pack(fill="both", expand=True, padx=18, pady=5)
@@ -81,7 +81,7 @@ class KhatonStudio(tk.Tk):
         self.editor.pack(side="left", fill="both", expand=True)
         scroll = ttk.Scrollbar(editor_frame, orient="vertical", command=self._scroll_editor); scroll.pack(side="right", fill="y")
         self.editor.configure(yscrollcommand=lambda *args: (scroll.set(*args), self.lines.redraw()))
-        self.editor.bind("<KeyRelease>", self._highlight); self.editor.bind("<Configure>", self.lines.redraw); self.editor.bind("<MouseWheel>", self.lines.redraw)
+        self.editor.bind("<KeyRelease>", self._on_editor_change); self.editor.bind("<Configure>", self.lines.redraw); self.editor.bind("<MouseWheel>", self.lines.redraw); self.editor.bind("<ButtonRelease-1>", self._update_cursor_status); self.editor.bind("<Control-r>", lambda _: self.run_code()); self.editor.bind("<F5>", lambda _: self.run_code())
         body.add(editor_frame, minsize=260)
         output_frame = tk.Frame(body, bg=PANEL)
         tk.Label(output_frame, text="Output / diagnostics", bg=PANEL, fg=MUTED, anchor="w").pack(fill="x", padx=10, pady=(7, 2))
@@ -91,6 +91,11 @@ class KhatonStudio(tk.Tk):
         for tag, color in (("keyword", "#ff7b72"), ("number", "#79c0ff"), ("string", "#a5d6ff"), ("comment", "#8b949e")):
             self.editor.tag_configure(tag, foreground=color)
 
+    def _on_editor_change(self, *_):
+        self._highlight(); self._update_cursor_status()
+    def _update_cursor_status(self, *_):
+        line, column = self.editor.index("insert").split('.')
+        self.status.config(text=f"Ready — line {line}, column {int(column) + 1}")
     def _scroll_editor(self, *args):
         self.editor.yview(*args); self.lines.redraw()
     def _load_example(self):
@@ -108,6 +113,18 @@ class KhatonStudio(tk.Tk):
             self.current_file = Path(path); self.current_file.write_text(self.editor.get("1.0", "end-1c"), encoding="utf-8"); self.status.config(text=f"Saved {self.current_file.name}")
     def _write_output(self, text, error=False):
         self.output.configure(state="normal"); self.output.delete("1.0", "end"); self.output.insert("1.0", text); self.output.configure(state="disabled"); self.status.config(text="Error" if error else "Finished", fg=ERROR if error else GREEN)
+    def check_syntax(self):
+        try:
+            parse(self.editor.get("1.0", "end-1c")); self._write_output("Syntax OK")
+        except Exception as exc: self._write_output(str(exc), True)
+    def run_selection(self):
+        try:
+            source = self.editor.get("sel.first", "sel.last")
+        except tk.TclError:
+            self._write_output("Select Khaton code first", True); return
+        try:
+            result = KhatonRuntime().run(parse(source)); self._write_output("\\n".join(result.output) or "(no output)")
+        except Exception as exc: self._write_output(str(exc), True)
     def run_code(self):
         source = self.editor.get("1.0", "end-1c")
         def worker():

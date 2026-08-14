@@ -20,7 +20,7 @@ jobs:
         run: python -m pip install --upgrade pip pyinstaller pillow
       - name: Build standalone EXE
         shell: pwsh
-        run: pyinstaller --noconfirm --clean --onefile --windowed --name KhatonStudio --add-data "studio/assets;studio/assets" studio/khaton_studio.py
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name KhatonStudio --paths . --hidden-import khaton --hidden-import khaton.bytecode --hidden-import khaton.lexer --hidden-import khaton.parser --hidden-import khaton.runtime --hidden-import khaton.stdlib --add-data "studio/assets;studio/assets" khaton_studio.py
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
