@@ -2,6 +2,7 @@ from __future__ import annotations
 import os
 import sys
 import threading
+import webbrowser
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -28,6 +29,8 @@ MUTED = "#8b949e"
 ACCENT = "#58a6ff"
 GREEN = "#3fb950"
 ERROR = "#f85149"
+GOLD = "#d6ad66"
+GITHUB_URL = "https://github.com/e3e4e5hoi-star/Khaton"
 KEYWORDS = set(COMMANDS)
 
 class LineNumbers(tk.Canvas):
@@ -47,9 +50,9 @@ class LineNumbers(tk.Canvas):
 class KhatonStudio(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Khaton Studio")
-        self.geometry("1100x720")
-        self.minsize(800, 520)
+        self.title("Khaton Studio · Khaton Language")
+        self.geometry("1180x760")
+        self.minsize(860, 560)
         self.configure(bg=BG)
         self.current_file: Path | None = None
         self._build_ui()
@@ -58,9 +61,11 @@ class KhatonStudio(tk.Tk):
     def _build_ui(self):
         style = ttk.Style(self)
         style.theme_use("clam")
-        style.configure("TButton", background=PANEL, foreground=TEXT, padding=(12, 7), borderwidth=0)
-        style.map("TButton", background=[("active", "#263244")])
-        header = tk.Frame(self, bg=BG, height=72); header.pack(fill="x", padx=18, pady=(12, 5))
+        style.configure("TButton", background=PANEL, foreground=TEXT, padding=(11, 7), borderwidth=0, font=("Segoe UI", 9))
+        style.map("TButton", background=[("active", "#2b3a50")], foreground=[("active", "#ffffff")])
+        style.configure("Accent.TButton", background=GOLD, foreground="#15181d", padding=(12, 7), font=("Segoe UI", 9, "bold"))
+        style.map("Accent.TButton", background=[("active", "#edc57e")])
+        header = tk.Frame(self, bg=BG, height=78); header.pack(fill="x", padx=18, pady=(12, 5))
         logo_path = ROOT / "studio" / "assets" / "khaton-camel.jpg"
         if Image and logo_path.exists():
             image = Image.open(logo_path).resize((54, 54))
@@ -68,10 +73,12 @@ class KhatonStudio(tk.Tk):
             tk.Label(header, image=self.logo, bg=BG).pack(side="left", padx=(0, 12))
         title = tk.Frame(header, bg=BG); title.pack(side="left")
         tk.Label(title, text="Khaton Studio", fg=TEXT, bg=BG, font=("Segoe UI", 21, "bold")).pack(anchor="w")
-        tk.Label(title, text="A colorful editor for the Khaton language", fg=MUTED, bg=BG, font=("Segoe UI", 10)).pack(anchor="w")
+        tk.Label(title, text="A focused editor for the Khaton language  ·  39 commands  ·  17 libraries", fg=MUTED, bg=BG, font=("Segoe UI", 10)).pack(anchor="w")
         toolbar = tk.Frame(header, bg=BG); toolbar.pack(side="right", pady=8)
         for label, command in (("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Find & Replace", self.find_replace), ("Check", self.check_syntax), ("Run ▶", self.run_code), ("Run Selection", self.run_selection), ("Compile", self.compile_code)):
-            ttk.Button(toolbar, text=label, command=command).pack(side="left", padx=3)
+            button_style = "Accent.TButton" if label == "Run ▶" else "TButton"
+            ttk.Button(toolbar, text=label, command=command, style=button_style).pack(side="left", padx=3)
+        ttk.Button(toolbar, text="GitHub ↗", command=lambda: webbrowser.open(GITHUB_URL)).pack(side="left", padx=(10, 0))
         body = tk.PanedWindow(self, orient="vertical", sashrelief="flat", bg=BG, borderwidth=0)
         body.pack(fill="both", expand=True, padx=18, pady=5)
         editor_frame = tk.Frame(body, bg=EDITOR)
@@ -87,7 +94,9 @@ class KhatonStudio(tk.Tk):
         tk.Label(output_frame, text="Output / diagnostics", bg=PANEL, fg=MUTED, anchor="w").pack(fill="x", padx=10, pady=(7, 2))
         self.output = tk.Text(output_frame, height=8, bg="#0b0f14", fg=TEXT, insertbackground=TEXT, font=("Consolas", 10), state="disabled", wrap="word", borderwidth=0, padx=10, pady=8)
         self.output.pack(fill="both", expand=True, padx=8, pady=(0, 8)); body.add(output_frame, minsize=120)
-        self.status = tk.Label(self, text="Ready — Khaton Studio", bg=BG, fg=MUTED, anchor="w"); self.status.pack(fill="x", padx=18, pady=(0, 8))
+        status_bar = tk.Frame(self, bg="#0b0f14", height=30); status_bar.pack(fill="x", padx=18, pady=(0, 10))
+        self.status = tk.Label(status_bar, text="● Ready — Khaton Studio", bg="#0b0f14", fg=GREEN, anchor="w", font=("Segoe UI", 9)); self.status.pack(side="left", padx=10, pady=6)
+        tk.Label(status_bar, text="github.com/e3e4e5hoi-star/Khaton", bg="#0b0f14", fg="#758195", anchor="e", font=("Consolas", 8)).pack(side="right", padx=10)
         for tag, color in (("keyword", "#ff7b72"), ("number", "#79c0ff"), ("string", "#a5d6ff"), ("comment", "#8b949e")):
             self.editor.tag_configure(tag, foreground=color)
 
@@ -95,7 +104,7 @@ class KhatonStudio(tk.Tk):
         self._highlight(); self._update_cursor_status()
     def _update_cursor_status(self, *_):
         line, column = self.editor.index("insert").split('.')
-        self.status.config(text=f"Ready — line {line}, column {int(column) + 1}")
+        self.status.config(text=f"● Ready — line {line}, column {int(column) + 1}", fg=GREEN)
     def _scroll_editor(self, *args):
         self.editor.yview(*args); self.lines.redraw()
     def _load_example(self):

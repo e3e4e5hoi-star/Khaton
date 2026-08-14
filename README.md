@@ -92,3 +92,10 @@ The project is maintained by [e3e4e5hoi-star](https://github.com/e3e4e5hoi-star)
 ## License
 
 MIT License. See [LICENSE](LICENSE).
+
+
+## Latest Studio update
+
+The current Khaton Studio release includes a refreshed dark Khaton-branded interface, a direct **GitHub** shortcut, syntax checking, selected-code execution, live cursor line/column status, Find & Replace, the camel logo, and the existing Run/Compile workflow.
+
+Public repository: [github.com/e3e4e5hoi-star/Khaton](https://github.com/e3e4e5hoi-star/Khaton).
