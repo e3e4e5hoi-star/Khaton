@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "khaton-lang"
+version = "0.1.0"
+description = "A compact C++-F# inspired scripting language with interpreter and bytecode execution"
+readme = "README.md"
+requires-python = ">=3.10"
+[project.scripts]
+khaton = "khaton.cli:main"
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+[tool.setuptools.packages.find]
+include = ["khaton*"]
