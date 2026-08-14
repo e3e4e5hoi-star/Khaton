@@ -11,7 +11,7 @@ def test_command_and_library_contracts():
     for name in LIBRARIES: assert load_library(name)
 
 def test_interpreter_arithmetic_and_event():
-    runtime = KhatonRuntime().run(parse('let x = 6\nlet y = 7\nmul answer x y\nadd answer answer 1\nassert answer\nprint answer\nemit done answer'))
+    runtime = KhatonRuntime().run(parse('let x = 6\nlet y = 7\nmul answer x y\nadd answer answer 1\nassert answer\nprintty answer\nemit done answer'))
     assert runtime.output == ['43']
     assert runtime.events[0]['event'] == 'done'
 
@@ -20,7 +20,7 @@ def test_repeat_and_import():
     assert runtime.env['n'] == 3 and 'sqrt' in runtime.env['math']
 
 def test_const_and_if_else_regressions():
-    runtime = KhatonRuntime().run(parse('const limit = 3\nif 0\nprint bad\nelse\nprint limit\nend'))
+    runtime = KhatonRuntime().run(parse('const limit = 3\nif 0\nprintty bad\nelse\nprintty limit\nend'))
     assert runtime.output == ['3']
     try:
         KhatonRuntime().run(parse('const x = 1\nset x 2'))
@@ -29,7 +29,7 @@ def test_const_and_if_else_regressions():
         assert 'constant x cannot be reassigned' in str(exc)
 
 def test_try_catch_finally():
-    source = 'try begin\nassert 0\ntry catch as error\nprint error\ntry finally\nprint done\ntry end'
+    source = 'try begin\nassert 0\ntry catch as error\nprintty error\ntry finally\nprintty done\ntry end'
     runtime = KhatonRuntime().run(parse(source))
     assert runtime.output[0].startswith('line 2: assertion failed')
     assert runtime.output[1] == 'done'
@@ -42,9 +42,17 @@ def test_try_without_catch_propagates():
         assert 'assertion failed' in str(exc)
 
 def test_bytecode_round_trip():
-    program = compile_source('let x = 4\nadd y x 2\nprint y')
+    program = compile_source('let x = 4\nadd y x 2\nprintty y')
     assert run_bytecode(program).output == ['6']
 
 def test_parser_comments_and_quotes():
-    assert lex('print "hello world" # comment') == ['print', 'hello world']
-    assert parse('print "hello"')[0].command == 'print'
+    assert lex('printty "hello world" # comment') == ['printty', 'hello world']
+    assert parse('printty "hello"')[0].command == 'printty'
+
+
+def test_legacy_print_is_rejected():
+    try:
+        parse('print "legacy"')
+        assert False
+    except SyntaxError as exc:
+        assert 'unknown command print' in str(exc)

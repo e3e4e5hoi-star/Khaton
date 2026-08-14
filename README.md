@@ -6,7 +6,7 @@ Khaton is a compact experimental programming language inspired by the explicit, 
 
 ## 39 commands
 
-`let`, `const`, `print`, `input`, `if`, `else`, `end`, `repeat`, `while`, `fn`, `return`, `call`, `import`, `match`, `case`, `break`, `continue`, `assert`, `type`, `struct`, `enum`, `new`, `delete`, `set`, `get`, `add`, `sub`, `mul`, `div`, `mod`, `eq`, `lt`, `gt`, `and`, `or`, `not`, `emit`, `sleep`, and `try`.
+`let`, `const`, `printty`, `input`, `if`, `else`, `end`, `repeat`, `while`, `fn`, `return`, `call`, `import`, `match`, `case`, `break`, `continue`, `assert`, `type`, `struct`, `enum`, `new`, `delete`, `set`, `get`, `add`, `sub`, `mul`, `div`, `mod`, `eq`, `lt`, `gt`, `and`, `or`, `not`, `emit`, `sleep`, and `try`.
 
 The core executable semantics cover immutable constants, variable binding, output, input, arithmetic and boolean operations, assertions, imports, if/else blocks, bounded repeat loops, event emission, sleep, basic object storage, bytecode compilation, and structured exception handling. The remaining reserved commands are part of the forward-compatible grammar and produce explicit behavior or safe no-op semantics while the language grows.
 
@@ -38,7 +38,7 @@ import math
 let x = 6
 let y = 7
 mul product x y
-print product
+printty product
 add answer product 1
 assert answer
 emit calculation answer
@@ -75,9 +75,9 @@ Khaton uses one command family, `try`, with explicit modes. The `try begin` bloc
 try begin
   assert 0
 try catch as error
-  print error
+  printty error
 try finally
-  print cleanup
+  printty cleanup
 try end
 ```
 

@@ -61,7 +61,7 @@ class KhatonRuntime:
                     if a[0] in self.constants: raise ValueError(f'constant {a[0]} cannot be reassigned')
                     self.env[a[0]] = self.value(' '.join(a[2:]))
                     if c == 'const': self.constants.add(a[0])
-                elif c == 'print': self.output.append(' '.join(str(self.value(x)) for x in a))
+                elif c == 'printty': self.output.append(' '.join(str(self.value(x)) for x in a))
                 elif c == 'input': self.env[a[0]] = input(' '.join(a[1:]))
                 elif c in {'add','sub','mul','div','mod','eq','lt','gt','and','or'}:
                     if len(a) != 3: raise ValueError(f'{c} requires target left right')

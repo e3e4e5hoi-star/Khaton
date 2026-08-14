@@ -2,7 +2,7 @@ import math
 let x = 6
 let y = 7
 mul product x y
-print product
+printty product
 add answer product 1
 assert answer
 emit calculation answer
