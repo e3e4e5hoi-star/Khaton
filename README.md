@@ -99,3 +99,6 @@ MIT License. See [LICENSE](LICENSE).
 The current Khaton Studio release includes a refreshed dark Khaton-branded interface, a direct **GitHub** shortcut, syntax checking, selected-code execution, live cursor line/column status, Find & Replace, the camel logo, and the existing Run/Compile workflow.
 
 Public repository: [github.com/e3e4e5hoi-star/Khaton](https://github.com/e3e4e5hoi-star/Khaton).
+
+
+The latest Studio update also adds **Save Output** for exporting execution results and diagnostics to a UTF-8 text file, plus **Clear** for resetting the output panel without touching the source editor.

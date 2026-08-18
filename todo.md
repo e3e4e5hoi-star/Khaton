@@ -10,3 +10,7 @@
 
 - [x] Rename the Khaton output command from print to printty across lexer, parser, runtime, bytecode, examples, Studio, README, and tests
 - [x] Add a regression test proving printty executes and legacy print is rejected or handled according to the new language contract
+
+- [x] Select and implement one useful Khaton language or Studio upgrade while preserving printty and existing behavior
+- [x] Add regression tests and update README/examples for the new upgrade
+- [ ] Push the upgrade and produce a fresh Windows Studio build

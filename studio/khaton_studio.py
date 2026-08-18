@@ -75,7 +75,7 @@ class KhatonStudio(tk.Tk):
         tk.Label(title, text="Khaton Studio", fg=TEXT, bg=BG, font=("Segoe UI", 21, "bold")).pack(anchor="w")
         tk.Label(title, text="A focused editor for the Khaton language  ·  39 commands  ·  17 libraries", fg=MUTED, bg=BG, font=("Segoe UI", 10)).pack(anchor="w")
         toolbar = tk.Frame(header, bg=BG); toolbar.pack(side="right", pady=8)
-        for label, command in (("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Find & Replace", self.find_replace), ("Check", self.check_syntax), ("Run ▶", self.run_code), ("Run Selection", self.run_selection), ("Compile", self.compile_code)):
+        for label, command in (("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Find & Replace", self.find_replace), ("Check", self.check_syntax), ("Run ▶", self.run_code), ("Run Selection", self.run_selection), ("Compile", self.compile_code), ("Save Output", self.save_output)):
             button_style = "Accent.TButton" if label == "Run ▶" else "TButton"
             ttk.Button(toolbar, text=label, command=command, style=button_style).pack(side="left", padx=3)
         ttk.Button(toolbar, text="GitHub ↗", command=lambda: webbrowser.open(GITHUB_URL)).pack(side="left", padx=(10, 0))
@@ -91,7 +91,9 @@ class KhatonStudio(tk.Tk):
         self.editor.bind("<KeyRelease>", self._on_editor_change); self.editor.bind("<Configure>", self.lines.redraw); self.editor.bind("<MouseWheel>", self.lines.redraw); self.editor.bind("<ButtonRelease-1>", self._update_cursor_status); self.editor.bind("<Control-r>", lambda _: self.run_code()); self.editor.bind("<F5>", lambda _: self.run_code()); self.editor.bind("<Control-f>", lambda _: self.find_replace())
         body.add(editor_frame, minsize=260)
         output_frame = tk.Frame(body, bg=PANEL)
-        tk.Label(output_frame, text="Output / diagnostics", bg=PANEL, fg=MUTED, anchor="w").pack(fill="x", padx=10, pady=(7, 2))
+        output_header = tk.Frame(output_frame, bg=PANEL); output_header.pack(fill="x", padx=10, pady=(7, 2))
+        tk.Label(output_header, text="Output / diagnostics", bg=PANEL, fg=MUTED, anchor="w").pack(side="left")
+        ttk.Button(output_header, text="Clear", command=self.clear_output).pack(side="right")
         self.output = tk.Text(output_frame, height=8, bg="#0b0f14", fg=TEXT, insertbackground=TEXT, font=("Consolas", 10), state="disabled", wrap="word", borderwidth=0, padx=10, pady=8)
         self.output.pack(fill="both", expand=True, padx=8, pady=(0, 8)); body.add(output_frame, minsize=120)
         status_bar = tk.Frame(self, bg="#0b0f14", height=30); status_bar.pack(fill="x", padx=18, pady=(0, 10))
@@ -159,7 +161,18 @@ class KhatonStudio(tk.Tk):
         ttk.Button(buttons, text="Close", command=dialog.destroy).pack(side="right", padx=3)
         find_entry.focus_set()
     def _write_output(self, text, error=False):
-        self.output.configure(state="normal"); self.output.delete("1.0", "end"); self.output.insert("1.0", text); self.output.configure(state="disabled"); self.status.config(text="Error" if error else "Finished", fg=ERROR if error else GREEN)
+        self.output.configure(state="normal"); self.output.delete("1.0", "end"); self.output.insert("1.0", text); self.output.configure(state="disabled"); self.status.config(text="● Error" if error else "● Finished", fg=ERROR if error else GREEN)
+    def clear_output(self):
+        self.output.configure(state="normal"); self.output.delete("1.0", "end"); self.output.configure(state="disabled"); self.status.config(text="● Output cleared", fg=MUTED)
+    def save_output(self):
+        content = self.output.get("1.0", "end-1c")
+        if not content.strip():
+            self.status.config(text="● No output to save", fg=MUTED)
+            return
+        path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt"), ("All files", "*.*")], title="Save Khaton output")
+        if path:
+            Path(path).write_text(content, encoding="utf-8")
+            self.status.config(text=f"● Output saved to {Path(path).name}", fg=GREEN)
     def check_syntax(self):
         try:
             parse(self.editor.get("1.0", "end-1c")); self._write_output("Syntax OK")
