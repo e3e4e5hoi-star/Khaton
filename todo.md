@@ -20,4 +20,8 @@
 - [x] Audit CLI error handling, file encoding, exit codes, and missing arguments
 - [x] Audit Studio thread safety, dialogs, output saving, highlighting, and bundled paths
 - [x] Add regression tests for every confirmed bug and update documentation
-- [ ] Publish the bug-fix release and build a new Windows EXE/Setup
+- [x] Publish the bug-fix release and build a new Windows EXE/Setup
+
+- [x] Rename the Khaton conditional command from elif to Deli across lexer, runtime, bytecode, examples, Studio, README, and tests
+- [x] Add regression coverage proving Deli works and legacy elif is rejected under the new language contract
+- [ ] Publish the Deli update and build a fresh Windows EXE/Setup

@@ -17,3 +17,8 @@ Khaton Studio now includes **Save Output** for exporting diagnostics and executi
 ## Bug-fix update
 
 This maintenance update hardens runtime block handling so zero-count repeats skip their bodies and nested `if` blocks no longer consume a repeat terminator. It also adds clear validation for missing command arguments, rejects negative sleep durations, validates bytecode argument types and positive source lines, and reads CLI source files through context-managed UTF-8 helpers. Regression coverage now includes malformed bytecode, CLI compilation, nested control flow, zero-count repeats, and invalid command arguments.
+
+
+## Deli conditional command
+
+Khaton now uses `Deli` for else-if branches. It supports chained conditions with `if`, `Deli`, and `else`; the legacy `elif` spelling is intentionally rejected so the language contract remains unambiguous. The command count is now 40.

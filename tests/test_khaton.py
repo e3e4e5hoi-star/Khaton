@@ -6,7 +6,7 @@ from khaton.runtime import KhatonRuntime
 from khaton.stdlib import LIBRARIES, load_library
 
 def test_command_and_library_contracts():
-    assert len(COMMANDS) == 39
+    assert len(COMMANDS) == 40
     assert len(LIBRARIES) == 17
     for name in LIBRARIES: assert load_library(name)
 
@@ -105,3 +105,14 @@ def test_runtime_rejects_invalid_command_arguments():
             assert False
         except RuntimeError as exc:
             assert message in str(exc)
+
+
+def test_deli_branching_and_legacy_elif_rejection():
+    source = 'let score = 2\nif 0\nprintty wrong\nDeli score\nprintty middle\nelse\nprintty fallback\nend'
+    runtime = KhatonRuntime().run(parse(source))
+    assert runtime.output == ['middle']
+    try:
+        parse('elif 1')
+        assert False
+    except SyntaxError as exc:
+        assert 'unknown command elif' in str(exc)

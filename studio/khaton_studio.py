@@ -73,7 +73,7 @@ class KhatonStudio(tk.Tk):
             tk.Label(header, image=self.logo, bg=BG).pack(side="left", padx=(0, 12))
         title = tk.Frame(header, bg=BG); title.pack(side="left")
         tk.Label(title, text="Khaton Studio", fg=TEXT, bg=BG, font=("Segoe UI", 21, "bold")).pack(anchor="w")
-        tk.Label(title, text="A focused editor for the Khaton language  ·  39 commands  ·  17 libraries", fg=MUTED, bg=BG, font=("Segoe UI", 10)).pack(anchor="w")
+        tk.Label(title, text="A focused editor for the Khaton language  ·  40 commands  ·  17 libraries", fg=MUTED, bg=BG, font=("Segoe UI", 10)).pack(anchor="w")
         toolbar = tk.Frame(header, bg=BG); toolbar.pack(side="right", pady=8)
         for label, command in (("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Find & Replace", self.find_replace), ("Check", self.check_syntax), ("Run ▶", self.run_code), ("Run Selection", self.run_selection), ("Compile", self.compile_code), ("Save Output", self.save_output)):
             button_style = "Accent.TButton" if label == "Run ▶" else "TButton"
