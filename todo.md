@@ -45,3 +45,8 @@
 - [x] Deep-audit bytecode schema validation, CLI exit/error behavior, and Studio packaging paths
 - [x] Add regression tests for each newly confirmed bug and update changelog
 - [x] Publish the second bug-fix pass and build a fresh Windows EXE/Setup
+
+- [x] Audit remaining runtime, CLI, bytecode, and Studio edge cases
+- [x] Add the new CLI arguments feature so Khaton programs can read positional arguments safely
+- [x] Add regression tests and update README/CHANGELOG
+- [x] Publish the update and build a fresh Windows EXE/Setup

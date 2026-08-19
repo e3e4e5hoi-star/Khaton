@@ -112,3 +112,15 @@ The current release includes broader runtime validation and regression fixes. Ze
 ## Runtime performance update
 
 The runtime now caches literal resolution and block boundaries during each execution. This avoids repeated parsing and structural scans inside loops, while preserving `printty`, `Deli`, interpreter, and bytecode behavior. The test suite includes a nested 5,000-iteration performance guard.
+
+
+## Passing command-line arguments
+
+Khaton programs can receive positional arguments through the new `args` command. Use `args` with one target variable; the variable receives a list of strings supplied after the source file:
+
+```khaton
+args received
+printty received
+```
+
+Run it with `python -m khaton run example.kh first second`, or compile it and execute with `python -m khaton exec example.kbc first second`. The example prints `['first', 'second']`. If no arguments are supplied, the value is an empty list. This release contains 41 commands.

@@ -64,7 +64,9 @@ class KhatonRuntime:
         except (ValueError, SyntaxError): value = text
         self._literal_cache[text] = value
         return value
-    def run(self, statements: list[Statement]):
+    def run(self, statements: list[Statement], argv: list[str] | None = None):
+        if argv is not None:
+            self.env['_argv'] = list(argv)
         pc = 0; repeat_stack = []; branch_taken = {}; block_end_cache = {}
         def block_end_at(start):
             if start not in block_end_cache:
@@ -79,6 +81,9 @@ class KhatonRuntime:
                     self.env[a[0]] = self.value(' '.join(a[2:]))
                     if c == 'const': self.constants.add(a[0])
                 elif c == 'printty': self.output.append(' '.join(str(self.value(x)) for x in a))
+                elif c == 'args':
+                    if len(a) != 1: raise ValueError('args requires one target variable')
+                    self.env[a[0]] = list(self.env.get('_argv', []))
                 elif c == 'input':
                     if not a: raise ValueError('input requires a target variable')
                     if len(a) > 1 and a[1] == '=': raise ValueError('input syntax: input name [prompt]')

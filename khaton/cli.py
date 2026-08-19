@@ -11,11 +11,11 @@ def _read_source(path: str) -> str:
 
 def main(argv=None):
     p = argparse.ArgumentParser(prog='khaton'); sub = p.add_subparsers(dest='action', required=True)
-    run = sub.add_parser('run'); run.add_argument('file')
+    run = sub.add_parser('run'); run.add_argument('file'); run.add_argument('program_args', nargs='*')
     comp = sub.add_parser('compile'); comp.add_argument('file'); comp.add_argument('-o', '--output', required=True)
-    exe = sub.add_parser('exec'); exe.add_argument('file')
+    exe = sub.add_parser('exec'); exe.add_argument('file'); exe.add_argument('program_args', nargs='*')
     args = p.parse_args(argv)
-    if args.action == 'run': result = KhatonRuntime().run(parse(_read_source(args.file)))
+    if args.action == 'run': result = KhatonRuntime().run(parse(_read_source(args.file)), argv=args.program_args)
     elif args.action == 'compile': save_bytecode(compile_source(_read_source(args.file)), args.output); print(f'compiled {args.file} -> {args.output}'); return 0
-    else: result = run_bytecode(load_bytecode(args.file))
+    else: result = run_bytecode(load_bytecode(args.file), argv=args.program_args)
     print('\n'.join(result.output)); return 0

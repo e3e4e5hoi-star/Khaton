@@ -23,8 +23,8 @@ def load_bytecode(path: str) -> dict:
             raise ValueError('invalid Khaton instruction')
     return program
 
-def run_bytecode(program: dict):
+def run_bytecode(program: dict, argv: list[str] | None = None):
     from .runtime import KhatonRuntime
     from .parser import Statement
     statements = [Statement(x['op'], tuple(x['args']), int(x['line'])) for x in program['instructions']]
-    return KhatonRuntime().run(statements)
+    return KhatonRuntime().run(statements, argv=argv)

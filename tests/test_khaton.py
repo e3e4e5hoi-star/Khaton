@@ -6,7 +6,7 @@ from khaton.runtime import KhatonRuntime
 from khaton.stdlib import LIBRARIES, load_library
 
 def test_command_and_library_contracts():
-    assert len(COMMANDS) == 40
+    assert len(COMMANDS) == 41
     assert len(LIBRARIES) == 17
     for name in LIBRARIES: assert load_library(name)
 
@@ -159,3 +159,28 @@ def test_studio_source_launcher_uses_repository_root_and_real_newlines():
     assert "Path(__file__).resolve().parent.parent" in studio_source
     assert 'self._write_output("\\n".join(result.output)' in studio_source
     assert 'self._write_output("\\\\n".join(result.output)' not in studio_source
+
+
+def test_args_command_receives_cli_values_and_does_not_alias_input():
+    runtime = KhatonRuntime().run(parse('args received\nprintty received'), argv=['alpha', 'beta'])
+    assert runtime.env['received'] == ['alpha', 'beta']
+    assert runtime.output == ["['alpha', 'beta']"]
+
+
+def test_args_command_requires_one_target():
+    try:
+        KhatonRuntime().run(parse('args'))
+        assert False
+    except RuntimeError as exc:
+        assert 'args requires one target variable' in str(exc)
+
+
+def test_bytecode_and_cli_forward_program_args(tmp_path, capsys):
+    from khaton.cli import main
+    source = tmp_path / 'args.kh'
+    bytecode = tmp_path / 'args.kbc'
+    source.write_text('args received\nprintty received\n', encoding='utf-8')
+    assert main(['compile', str(source), '-o', str(bytecode)]) == 0
+    capsys.readouterr()
+    assert main(['exec', str(bytecode), 'one', 'two']) == 0
+    assert capsys.readouterr().out.strip() == "['one', 'two']"

@@ -36,3 +36,8 @@ Runtime execution now caches parsed literal values and block-end positions durin
 - Unsupported declared commands now fail loudly with a clear not-implemented error wrapped with the source line number instead of silently doing nothing.
 - Added regression coverage for repeat type validation, import arity, and unsupported command behavior.
 - Verified the full test suite: 19 tests passing.
+
+
+## CLI arguments feature and bug-fix pass
+
+Khaton now includes the `args` command. It copies positional arguments supplied after a source or bytecode file into a target variable as a list of strings, and the `run` and `exec` CLI paths forward those arguments consistently. Validation rejects missing or extra target arguments. The command count is now 41, with regression coverage for interpreter, bytecode, and CLI execution.
