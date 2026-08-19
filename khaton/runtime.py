@@ -4,7 +4,7 @@ from .parser import Statement
 from .stdlib import load_library
 
 class KhatonRuntime:
-    def __init__(self): self.env = {}; self.constants = set(); self.output = []; self.events = []
+    def __init__(self): self.env = {}; self.constants = set(); self.output = []; self.events = []; self._literal_cache = {}
     def _run_try(self, statements, start: int):
         catch_at = finally_at = end_at = None
         depth = 0
@@ -59,10 +59,17 @@ class KhatonRuntime:
         return len(statements)
     def value(self, text: str):
         if text in self.env: return self.env[text]
-        try: return ast.literal_eval(text)
-        except (ValueError, SyntaxError): return text
+        if text in self._literal_cache: return self._literal_cache[text]
+        try: value = ast.literal_eval(text)
+        except (ValueError, SyntaxError): value = text
+        self._literal_cache[text] = value
+        return value
     def run(self, statements: list[Statement]):
-        pc = 0; repeat_stack = []; branch_taken = {}
+        pc = 0; repeat_stack = []; branch_taken = {}; block_end_cache = {}
+        def block_end_at(start):
+            if start not in block_end_cache:
+                block_end_cache[start] = self._block_end(statements, start)
+            return block_end_cache[start]
         while pc < len(statements):
             s = statements[pc]; c, a = s.command, s.args
             try:
@@ -105,13 +112,13 @@ class KhatonRuntime:
                 elif c == 'import': self.env[a[0]] = load_library(a[0])
                 elif c == 'if':
                     if not a: raise ValueError('if requires a condition')
-                    end_at = self._block_end(statements, pc)
+                    end_at = block_end_at(pc)
                     branch_taken[end_at] = bool(self.value(a[0]))
                     if not branch_taken[end_at]:
                         target = self._jump_to(statements, pc, {'Deli', 'else'})
                         pc = target - 1 if target < len(statements) and statements[target].command == 'Deli' else target
                 elif c == 'Deli':
-                    end_at = self._block_end(statements, pc)
+                    end_at = block_end_at(pc)
                     if branch_taken.get(end_at, False): pc = end_at
                     elif not a: raise ValueError('Deli requires a condition')
                     else:
@@ -120,14 +127,14 @@ class KhatonRuntime:
                             target = self._jump_to(statements, pc, {'Deli', 'else'})
                             pc = target - 1 if target < len(statements) and statements[target].command == 'Deli' else target
                 elif c == 'else':
-                    end_at = self._block_end(statements, pc)
+                    end_at = block_end_at(pc)
                     if branch_taken.get(end_at, False): pc = end_at
                     else: branch_taken[end_at] = True
                 elif c == 'repeat':
                     if len(a) != 1: raise ValueError('repeat requires one non-negative count')
                     count = int(self.value(a[0]))
                     if count < 0: raise ValueError('repeat requires a non-negative count')
-                    end_at = self._block_end(statements, pc)
+                    end_at = block_end_at(pc)
                     if count == 0:
                         pc = end_at
                     else:

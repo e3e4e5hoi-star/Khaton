@@ -22,3 +22,8 @@ This maintenance update hardens runtime block handling so zero-count repeats ski
 ## Deli conditional command
 
 Khaton now uses `Deli` for else-if branches. It supports chained conditions with `if`, `Deli`, and `else`; the legacy `elif` spelling is intentionally rejected so the language contract remains unambiguous. The command count is now 40.
+
+
+## Runtime performance maintenance
+
+Runtime execution now caches parsed literal values and block-end positions during a run. This removes repeated `ast.literal_eval` and block scanning work inside loops while preserving the existing interpreter and bytecode contracts. A regression guard now exercises a 5,000-iteration nested conditional loop.

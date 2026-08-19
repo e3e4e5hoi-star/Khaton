@@ -107,3 +107,8 @@ The latest Studio update also adds **Save Output** for exporting execution resul
 ## Reliability update
 
 The current release includes broader runtime validation and regression fixes. Zero-count `repeat` blocks now skip correctly, nested conditional blocks no longer interfere with repeat termination, incomplete commands return clear line-aware errors, negative `sleep` durations are rejected, malformed bytecode arguments are refused, and CLI source files are read safely with UTF-8 context-managed I/O.
+
+
+## Runtime performance update
+
+The runtime now caches literal resolution and block boundaries during each execution. This avoids repeated parsing and structural scans inside loops, while preserving `printty`, `Deli`, interpreter, and bytecode behavior. The test suite includes a nested 5,000-iteration performance guard.

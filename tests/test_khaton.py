@@ -116,3 +116,13 @@ def test_deli_branching_and_legacy_elif_rejection():
         assert False
     except SyntaxError as exc:
         assert 'unknown command elif' in str(exc)
+
+
+def test_large_repeat_has_reasonable_runtime():
+    from time import perf_counter
+    source = 'let n = 0\nrepeat 5000\nif 1\nadd n n 1\nend\nend\nprintty n'
+    started = perf_counter()
+    runtime = KhatonRuntime().run(parse(source))
+    elapsed = perf_counter() - started
+    assert runtime.output == ['5000']
+    assert elapsed < 2.0

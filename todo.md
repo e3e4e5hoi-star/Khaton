@@ -24,4 +24,14 @@
 
 - [x] Rename the Khaton conditional command from elif to Deli across lexer, runtime, bytecode, examples, Studio, README, and tests
 - [x] Add regression coverage proving Deli works and legacy elif is rejected under the new language contract
-- [ ] Publish the Deli update and build a fresh Windows EXE/Setup
+- [x] Publish the Deli update and build a fresh Windows EXE/Setup
+
+- [ ] Create an independent Khaton introduction and documentation website without modifying the Lila web project
+- [ ] Showcase printty, Deli, bytecode, 17 libraries, Khaton Studio, and recent bug fixes
+- [ ] Add install guide, code examples, navigation, GitHub link, and responsive documentation sections
+- [ ] Verify responsive rendering and content accuracy before delivery
+
+- [x] Profile interpreter execution on repeat, arithmetic, conditionals, and bytecode paths
+- [x] Reduce avoidable repeated parsing/value resolution and fix confirmed small runtime bugs
+- [x] Add performance guardrails and regression tests without using flaky hard time limits
+- [ ] Update README/changelog, publish the fix, and build a fresh Windows EXE/Setup
