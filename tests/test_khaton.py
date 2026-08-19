@@ -56,3 +56,52 @@ def test_legacy_print_is_rejected():
         assert False
     except SyntaxError as exc:
         assert 'unknown command print' in str(exc)
+
+
+def test_repeat_zero_skips_body_and_nested_if_does_not_close_repeat():
+    source = 'let n = 0\nrepeat 0\nadd n n 1\nend\nrepeat 2\nif 1\nadd n n 1\nend\nend'
+    runtime = KhatonRuntime().run(parse(source))
+    assert runtime.env['n'] == 2
+
+
+def test_missing_arguments_report_runtime_error():
+    for source in ('input', 'not', 'get', 'delete', 'new'):
+        try:
+            KhatonRuntime().run(parse(source))
+            assert False
+        except RuntimeError as exc:
+            assert 'line 1:' in str(exc)
+
+
+def test_bytecode_rejects_non_string_args_and_invalid_lines(tmp_path):
+    from khaton.bytecode import load_bytecode
+    malformed = tmp_path / 'bad.kbc'
+    malformed.write_text('{"version": 1, "instructions": [{"op": "printty", "args": [3], "line": 0}]}', encoding='utf-8')
+    try:
+        load_bytecode(str(malformed))
+        assert False
+    except ValueError as exc:
+        assert 'invalid Khaton instruction' in str(exc)
+
+
+def test_cli_compile_closes_source_and_writes_bytecode(tmp_path):
+    from khaton.cli import main
+    source = tmp_path / 'sample.kh'
+    output = tmp_path / 'sample.kbc'
+    source.write_text('printty "ok"\n', encoding='utf-8')
+    assert main(['compile', str(source), '-o', str(output)]) == 0
+    assert output.exists()
+
+
+def test_runtime_rejects_invalid_command_arguments():
+    for source, message in (
+        ('set', 'set requires'),
+        ('assert', 'assert requires'),
+        ('emit', 'emit requires'),
+        ('sleep -1', 'sleep duration cannot be negative'),
+    ):
+        try:
+            KhatonRuntime().run(parse(source))
+            assert False
+        except RuntimeError as exc:
+            assert message in str(exc)

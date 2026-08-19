@@ -12,3 +12,8 @@ The core language remains educational and deterministic, with the existing inter
 ## Studio maintenance update
 
 Khaton Studio now includes **Save Output** for exporting diagnostics and execution results to UTF-8 text, plus **Clear** for resetting the output panel without altering the source file. Existing `printty`, syntax checking, selection execution, cursor status, Find & Replace, and GitHub shortcut behavior remain intact.
+
+
+## Bug-fix update
+
+This maintenance update hardens runtime block handling so zero-count repeats skip their bodies and nested `if` blocks no longer consume a repeat terminator. It also adds clear validation for missing command arguments, rejects negative sleep durations, validates bytecode argument types and positive source lines, and reads CLI source files through context-managed UTF-8 helpers. Regression coverage now includes malformed bytecode, CLI compilation, nested control flow, zero-count repeats, and invalid command arguments.

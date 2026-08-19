@@ -102,3 +102,8 @@ Public repository: [github.com/e3e4e5hoi-star/Khaton](https://github.com/e3e4e5h
 
 
 The latest Studio update also adds **Save Output** for exporting execution results and diagnostics to a UTF-8 text file, plus **Clear** for resetting the output panel without touching the source editor.
+
+
+## Reliability update
+
+The current release includes broader runtime validation and regression fixes. Zero-count `repeat` blocks now skip correctly, nested conditional blocks no longer interfere with repeat termination, incomplete commands return clear line-aware errors, negative `sleep` durations are rejected, malformed bytecode arguments are refused, and CLI source files are read safely with UTF-8 context-managed I/O.
