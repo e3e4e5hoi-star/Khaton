@@ -7,7 +7,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-ROOT = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[1]))
+ROOT = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -183,7 +183,7 @@ class KhatonStudio(tk.Tk):
         except tk.TclError:
             self._write_output("Select Khaton code first", True); return
         try:
-            result = KhatonRuntime().run(parse(source)); self._write_output("\\n".join(result.output) or "(no output)")
+            result = KhatonRuntime().run(parse(source)); self._write_output("\n".join(result.output) or "(no output)")
         except Exception as exc: self._write_output(str(exc), True)
     def run_code(self):
         source = self.editor.get("1.0", "end-1c")

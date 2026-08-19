@@ -40,3 +40,8 @@
 - [x] Re-audit bytecode malformed-input handling and CLI command behavior
 - [x] Re-audit Studio run/save/output interactions and bundled asset paths
 - [x] Add regression tests for confirmed issues and publish a new Windows build
+
+- [x] Deep-audit expression parsing, block matching, try nesting, and runtime state reset between runs
+- [x] Deep-audit bytecode schema validation, CLI exit/error behavior, and Studio packaging paths
+- [x] Add regression tests for each newly confirmed bug and update changelog
+- [x] Publish the second bug-fix pass and build a fresh Windows EXE/Setup

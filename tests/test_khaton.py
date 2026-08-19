@@ -152,3 +152,10 @@ def test_declared_but_unimplemented_commands_fail_loudly():
             assert False
         except RuntimeError as exc:
             assert f'{command} is not implemented yet' in str(exc)
+
+
+def test_studio_source_launcher_uses_repository_root_and_real_newlines():
+    studio_source = Path('studio/khaton_studio.py').read_text(encoding='utf-8')
+    assert "Path(__file__).resolve().parent.parent" in studio_source
+    assert 'self._write_output("\\n".join(result.output)' in studio_source
+    assert 'self._write_output("\\\\n".join(result.output)' not in studio_source
