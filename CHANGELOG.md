@@ -27,3 +27,12 @@ Khaton now uses `Deli` for else-if branches. It supports chained conditions with
 ## Runtime performance maintenance
 
 Runtime execution now caches parsed literal values and block-end positions during a run. This removes repeated `ast.literal_eval` and block scanning work inside loops while preserving the existing interpreter and bytecode contracts. A regression guard now exercises a 5,000-iteration nested conditional loop.
+
+
+## Unreleased bug-fix pass
+
+- `repeat` now rejects booleans and non-integer values instead of silently truncating them.
+- `import` now validates that exactly one library name is supplied.
+- Unsupported declared commands now fail loudly with a clear not-implemented error wrapped with the source line number instead of silently doing nothing.
+- Added regression coverage for repeat type validation, import arity, and unsupported command behavior.
+- Verified the full test suite: 19 tests passing.

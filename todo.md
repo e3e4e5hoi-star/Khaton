@@ -34,4 +34,9 @@
 - [x] Profile interpreter execution on repeat, arithmetic, conditionals, and bytecode paths
 - [x] Reduce avoidable repeated parsing/value resolution and fix confirmed small runtime bugs
 - [x] Add performance guardrails and regression tests without using flaky hard time limits
-- [ ] Update README/changelog, publish the fix, and build a fresh Windows EXE/Setup
+- [x] Update README/changelog, publish the fix, and build a fresh Windows EXE/Setup
+
+- [x] Re-audit remaining runtime edge cases in Deli/else, repeat nesting, try blocks, and mutable state
+- [x] Re-audit bytecode malformed-input handling and CLI command behavior
+- [x] Re-audit Studio run/save/output interactions and bundled asset paths
+- [x] Add regression tests for confirmed issues and publish a new Windows build

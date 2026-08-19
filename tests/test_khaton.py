@@ -126,3 +126,29 @@ def test_large_repeat_has_reasonable_runtime():
     elapsed = perf_counter() - started
     assert runtime.output == ['5000']
     assert elapsed < 2.0
+
+
+def test_repeat_requires_an_integer_not_a_truncated_float_or_bool():
+    for value in ('2.5', 'True'):
+        try:
+            KhatonRuntime().run(parse(f'repeat {value}\nprintty bad\nend'))
+            assert False
+        except RuntimeError as exc:
+            assert 'repeat requires an integer count' in str(exc)
+
+
+def test_import_requires_exactly_one_library_name():
+    try:
+        KhatonRuntime().run(parse('import math extra'))
+        assert False
+    except RuntimeError as exc:
+        assert 'import requires one library name' in str(exc)
+
+
+def test_declared_but_unimplemented_commands_fail_loudly():
+    for command in ('while', 'fn', 'call', 'match', 'case'):
+        try:
+            KhatonRuntime().run(parse(command))
+            assert False
+        except RuntimeError as exc:
+            assert f'{command} is not implemented yet' in str(exc)

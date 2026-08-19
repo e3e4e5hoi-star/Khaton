@@ -81,6 +81,7 @@ class KhatonRuntime:
                 elif c == 'printty': self.output.append(' '.join(str(self.value(x)) for x in a))
                 elif c == 'input':
                     if not a: raise ValueError('input requires a target variable')
+                    if len(a) > 1 and a[1] == '=': raise ValueError('input syntax: input name [prompt]')
                     self.env[a[0]] = input(' '.join(a[1:]))
                 elif c in {'add','sub','mul','div','mod','eq','lt','gt','and','or'}:
                     if len(a) != 3: raise ValueError(f'{c} requires target left right')
@@ -109,7 +110,9 @@ class KhatonRuntime:
                 elif c == 'try':
                     if not a or a[0] != 'begin': raise ValueError('use try begin, try catch [as name], try finally, try end')
                     pc = self._run_try(statements, pc)
-                elif c == 'import': self.env[a[0]] = load_library(a[0])
+                elif c == 'import':
+                    if len(a) != 1: raise ValueError('import requires one library name')
+                    self.env[a[0]] = load_library(a[0])
                 elif c == 'if':
                     if not a: raise ValueError('if requires a condition')
                     end_at = block_end_at(pc)
@@ -132,7 +135,10 @@ class KhatonRuntime:
                     else: branch_taken[end_at] = True
                 elif c == 'repeat':
                     if len(a) != 1: raise ValueError('repeat requires one non-negative count')
-                    count = int(self.value(a[0]))
+                    raw_count = self.value(a[0])
+                    if isinstance(raw_count, bool) or not isinstance(raw_count, int):
+                        raise ValueError('repeat requires an integer count')
+                    count = raw_count
                     if count < 0: raise ValueError('repeat requires a non-negative count')
                     end_at = block_end_at(pc)
                     if count == 0:
@@ -149,7 +155,10 @@ class KhatonRuntime:
                             repeat_stack.pop()
                 elif c in {'while','fn','return','call','match','case','break','continue','type','struct','enum','new','delete'}:
                     if c == 'return': self.env['_return'] = self.value(a[0]) if a else None
-                    elif c == 'break': break
+                    elif c == 'break': raise NotImplementedError('break is not implemented yet')
+                    elif c == 'continue': raise NotImplementedError('continue is not implemented yet')
+                    elif c in {'while','fn','call','match','case','type','struct','enum'}:
+                        raise NotImplementedError(f'{c} is not implemented yet')
                     elif c == 'delete':
                         if len(a) != 1: raise ValueError('delete requires a variable')
                         self.env.pop(a[0], None)
