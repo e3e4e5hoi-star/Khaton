@@ -22,7 +22,7 @@ class KhatonRuntime:
         if catch_at is not None and finally_at is not None and catch_at > finally_at: raise SyntaxError('try catch must precede try finally')
         body_end = min(x for x in (catch_at, finally_at, end_at) if x is not None)
         caught = None
-        try: self.run(statements[start + 1:body_end])
+        try:             self.run(statements[start + 1:body_end], argv=list(self.env.get('_argv', [])))
         except RuntimeError as exc:
             caught = exc
             if catch_at is not None:
@@ -30,10 +30,10 @@ class KhatonRuntime:
                 catch_args = statements[catch_at].args
                 if len(catch_args) >= 3 and catch_args[1] == 'as': self.env[catch_args[2]] = str(exc)
                 elif len(catch_args) >= 2: self.env[catch_args[1]] = str(exc)
-                self.run(statements[catch_at + 1:catch_end])
+                self.run(statements[catch_at + 1:catch_end], argv=list(self.env.get('_argv', [])))
             else: raise
         finally:
-            if finally_at is not None: self.run(statements[finally_at + 1:end_at])
+            if finally_at is not None: self.run(statements[finally_at + 1:end_at], argv=list(self.env.get('_argv', [])))
         return end_at
 
     @staticmethod
@@ -65,8 +65,7 @@ class KhatonRuntime:
         self._literal_cache[text] = value
         return value
     def run(self, statements: list[Statement], argv: list[str] | None = None):
-        if argv is not None:
-            self.env['_argv'] = list(argv)
+        self.env['_argv'] = list(argv or [])
         pc = 0; repeat_stack = []; branch_taken = {}; block_end_cache = {}
         def block_end_at(start):
             if start not in block_end_cache:
@@ -83,6 +82,7 @@ class KhatonRuntime:
                 elif c == 'printty': self.output.append(' '.join(str(self.value(x)) for x in a))
                 elif c == 'args':
                     if len(a) != 1: raise ValueError('args requires one target variable')
+                    if a[0] == '_argv': raise ValueError('args target cannot be _argv')
                     self.env[a[0]] = list(self.env.get('_argv', []))
                 elif c == 'input':
                     if not a: raise ValueError('input requires a target variable')

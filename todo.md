@@ -50,3 +50,7 @@
 - [x] Add the new CLI arguments feature so Khaton programs can read positional arguments safely
 - [x] Add regression tests and update README/CHANGELOG
 - [x] Publish the update and build a fresh Windows EXE/Setup
+
+- [x] Audit runtime state, args handling, bytecode validation, CLI errors, and Studio edge cases again
+- [x] Add regression tests for every confirmed bug and update documentation
+- [x] Publish the bug-fix update and build a fresh Windows EXE/Setup

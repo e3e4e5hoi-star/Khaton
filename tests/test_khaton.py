@@ -184,3 +184,20 @@ def test_bytecode_and_cli_forward_program_args(tmp_path, capsys):
     capsys.readouterr()
     assert main(['exec', str(bytecode), 'one', 'two']) == 0
     assert capsys.readouterr().out.strip() == "['one', 'two']"
+
+
+def test_runtime_does_not_leak_cli_args_between_top_level_runs():
+    runtime = KhatonRuntime()
+    runtime.run(parse('args received'), argv=['old'])
+    runtime.run(parse('args received'))
+    assert runtime.env['received'] == []
+
+
+def test_args_are_preserved_inside_try_and_reserved_target_is_rejected():
+    runtime = KhatonRuntime().run(parse('try begin\nargs received\ntry end\nprintty received'), argv=['kept'])
+    assert runtime.output == ["['kept']"]
+    try:
+        KhatonRuntime().run(parse('args _argv'), argv=['x'])
+        assert False
+    except RuntimeError as exc:
+        assert 'args target cannot be _argv' in str(exc)

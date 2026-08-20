@@ -41,3 +41,8 @@ Runtime execution now caches parsed literal values and block-end positions durin
 ## CLI arguments feature and bug-fix pass
 
 Khaton now includes the `args` command. It copies positional arguments supplied after a source or bytecode file into a target variable as a list of strings, and the `run` and `exec` CLI paths forward those arguments consistently. Validation rejects missing or extra target arguments. The command count is now 41, with regression coverage for interpreter, bytecode, and CLI execution.
+
+
+## CLI argument state bug-fix pass
+
+Top-level runtime executions now reset `_argv` when no arguments are supplied, preventing positional arguments from leaking from a previous run. Nested `try` execution preserves the current argument list, and the reserved `_argv` target is rejected by `args`. Regression coverage now includes repeated runtime reuse and try-block argument propagation.
