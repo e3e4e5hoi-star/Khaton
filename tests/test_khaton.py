@@ -6,7 +6,7 @@ from khaton.runtime import KhatonRuntime
 from khaton.stdlib import LIBRARIES, load_library
 
 def test_command_and_library_contracts():
-    assert len(COMMANDS) == 41
+    assert len(COMMANDS) == 48
     assert len(LIBRARIES) == 17
     for name in LIBRARIES: assert load_library(name)
 
@@ -146,7 +146,7 @@ def test_import_requires_exactly_one_library_name():
 
 
 def test_declared_but_unimplemented_commands_fail_loudly():
-    for command in ('while', 'fn', 'call', 'match', 'case'):
+    for command in ('fn', 'call', 'match', 'case'):
         try:
             KhatonRuntime().run(parse(command))
             assert False
@@ -201,3 +201,24 @@ def test_args_are_preserved_inside_try_and_reserved_target_is_rejected():
         assert False
     except RuntimeError as exc:
         assert 'args target cannot be _argv' in str(exc)
+
+
+def test_while_loop():
+    source = 'let n = 0\nlt condition n 3\nwhile condition\nadd n n 1\nlt condition n 3\nend\nprintty n'
+    assert KhatonRuntime().run(parse(source)).output == ['3']
+
+
+def test_collection_and_type_commands():
+    source = ('range items 1 4\nappend items items 4\nlen size items\n'
+              'index first items 0\ncontains has items 3\njoin text "," items\n'
+              'type_of kind items\nprintty size first has text kind')
+    runtime = KhatonRuntime().run(parse(source))
+    assert runtime.output == ['4 1 True 1,2,3,4 list']
+
+
+def test_cli_check(tmp_path, capsys):
+    from khaton.cli import main
+    source = tmp_path / 'check.kh'
+    source.write_text('printty "ok"\n', encoding='utf-8')
+    assert main(['check', str(source)]) == 0
+    assert 'ok:' in capsys.readouterr().out

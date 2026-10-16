@@ -66,7 +66,7 @@ class KhatonRuntime:
         return value
     def run(self, statements: list[Statement], argv: list[str] | None = None):
         self.env['_argv'] = list(argv or [])
-        pc = 0; repeat_stack = []; branch_taken = {}; block_end_cache = {}
+        pc = 0; loop_stack = []; branch_taken = {}; block_end_cache = {}
         def block_end_at(start):
             if start not in block_end_cache:
                 block_end_cache[start] = self._block_end(statements, start)
@@ -112,6 +112,33 @@ class KhatonRuntime:
                     duration = float(self.value(a[0]))
                     if duration < 0: raise ValueError('sleep duration cannot be negative')
                     time.sleep(duration)
+                elif c == 'len':
+                    if len(a) != 2: raise ValueError('len requires target and value')
+                    self.env[a[0]] = len(self.value(a[1]))
+                elif c == 'append':
+                    if len(a) != 3: raise ValueError('append requires target, collection and value')
+                    collection = self.value(a[1])
+                    if not hasattr(collection, 'append'): raise ValueError('append requires a list-like collection')
+                    collection.append(self.value(a[2])); self.env[a[0]] = collection
+                elif c == 'index':
+                    if len(a) != 3: raise ValueError('index requires target, collection and position')
+                    collection, position = self.value(a[1]), self.value(a[2])
+                    if isinstance(position, bool) or not isinstance(position, int): raise ValueError('index position must be an integer')
+                    self.env[a[0]] = collection[position]
+                elif c == 'contains':
+                    if len(a) != 3: raise ValueError('contains requires target, collection and value')
+                    self.env[a[0]] = self.value(a[2]) in self.value(a[1])
+                elif c == 'range':
+                    if len(a) not in {3, 4}: raise ValueError('range requires target, start, stop [, step]')
+                    values = [self.value(item) for item in a[1:]]
+                    if any(isinstance(item, bool) or not isinstance(item, int) for item in values): raise ValueError('range values must be integers')
+                    self.env[a[0]] = list(range(*values))
+                elif c == 'join':
+                    if len(a) != 3: raise ValueError('join requires target, separator and collection')
+                    self.env[a[0]] = str(self.value(a[1])).join(str(item) for item in self.value(a[2]))
+                elif c == 'type_of':
+                    if len(a) != 2: raise ValueError('type_of requires target and value')
+                    self.env[a[0]] = type(self.value(a[1])).__name__
                 elif c == 'try':
                     if not a or a[0] != 'begin': raise ValueError('use try begin, try catch [as name], try finally, try end')
                     pc = self._run_try(statements, pc)
@@ -149,19 +176,35 @@ class KhatonRuntime:
                     if count == 0:
                         pc = end_at
                     else:
-                        repeat_stack.append((pc, count, end_at))
+                        if not loop_stack or loop_stack[-1][1] != pc:
+                            loop_stack.append(('repeat', pc, end_at, count))
+                elif c == 'while':
+                    if len(a) != 1: raise ValueError('while requires one condition')
+                    end_at = block_end_at(pc)
+                    if not bool(self.value(a[0])):
+                        if loop_stack and loop_stack[-1][1] == pc:
+                            loop_stack.pop()
+                        pc = end_at
+                    elif not loop_stack or loop_stack[-1][1] != pc:
+                        loop_stack.append(('while', pc, end_at, None))
                 elif c == 'end':
                     branch_taken.pop(pc, None)
-                    if repeat_stack and pc == repeat_stack[-1][2]:
-                        start, remaining, end_at = repeat_stack[-1]
-                        if remaining > 1:
-                            repeat_stack[-1] = (start, remaining - 1, end_at); pc = start
+                    if loop_stack and pc == loop_stack[-1][2]:
+                        kind, start, end_at, remaining = loop_stack[-1]
+                        if kind == 'repeat' and remaining > 1:
+                            loop_stack[-1] = (kind, start, end_at, remaining - 1); pc = start
+                        elif kind == 'while':
+                            pc = start - 1
                         else:
-                            repeat_stack.pop()
+                            loop_stack.pop()
                 elif c in {'while','fn','return','call','match','case','break','continue','type','struct','enum','new','delete'}:
                     if c == 'return': self.env['_return'] = self.value(a[0]) if a else None
-                    elif c == 'break': raise NotImplementedError('break is not implemented yet')
-                    elif c == 'continue': raise NotImplementedError('continue is not implemented yet')
+                    elif c in {'break', 'continue'}:
+                        if not loop_stack: raise RuntimeError(f'{c} used outside a loop')
+                        kind, start, end_at, remaining = loop_stack[-1]
+                        if c == 'break': loop_stack.pop(); pc = end_at
+                        elif kind == 'while': pc = start - 1
+                        else: pc = end_at - 1
                     elif c in {'while','fn','call','match','case','type','struct','enum'}:
                         raise NotImplementedError(f'{c} is not implemented yet')
                     elif c == 'delete':

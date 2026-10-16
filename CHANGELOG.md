@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-16 — Khaton 0.2.0
+
+- Added condition-controlled `while` loops with working `break` and `continue`.
+- Added `len`, `append`, `index`, `contains`, `range`, `join`, and `type_of` commands.
+- Expanded math, string, and collection standard-library helpers.
+- Added `khaton check` for syntax-only validation and `--version` reporting.
+- Fixed while-loop re-evaluation so changing the loop condition reliably terminates execution.
+- Added regression coverage for the new runtime and CLI behavior; all tests pass.
+
 ## 2026-08-14 — Khaton Studio 0.3.0
 
 This release consolidates the Khaton Studio desktop update and the Windows distribution fixes. The editor now provides syntax-only checking, selected-code execution, live cursor line/column status, and Find & Replace with `Ctrl+F`. The repository-root launcher and PyInstaller spec explicitly collect the Khaton runtime so the packaged application does not depend on a source-tree import.

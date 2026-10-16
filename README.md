@@ -4,11 +4,11 @@ Khaton is a compact experimental programming language inspired by the explicit, 
 
 > Khaton is an educational language implementation. It is not a drop-in replacement for C++ or F#, and it does not claim native-machine performance yet.
 
-## 40 commands
+## 48 commands
 
-`let`, `const`, `printty`, `input`, `if`, `Deli`, `else`, `end`, `repeat`, `while`, `fn`, `return`, `call`, `import`, `match`, `case`, `break`, `continue`, `assert`, `type`, `struct`, `enum`, `new`, `delete`, `set`, `get`, `add`, `sub`, `mul`, `div`, `mod`, `eq`, `lt`, `gt`, `and`, `or`, `not`, `emit`, `sleep`, and `try`.
+`let`, `const`, `printty`, `input`, `if`, `Deli`, `else`, `end`, `repeat`, `while`, `fn`, `return`, `call`, `import`, `match`, `case`, `break`, `continue`, `assert`, `type`, `struct`, `enum`, `new`, `delete`, `set`, `get`, `add`, `sub`, `mul`, `div`, `mod`, `eq`, `lt`, `gt`, `and`, `or`, `not`, `emit`, `sleep`, `try`, `args`, `len`, `append`, `index`, `contains`, `range`, `join`, and `type_of`.
 
-The core executable semantics cover immutable constants, variable binding, output, input, arithmetic and boolean operations, assertions, imports, if/Deli/else conditional blocks, bounded repeat loops, event emission, sleep, basic object storage, bytecode compilation, and structured exception handling. The remaining reserved commands are part of the forward-compatible grammar and produce explicit behavior or safe no-op semantics while the language grows.
+The core executable semantics cover immutable constants, variable binding, output, input, arithmetic and boolean operations, assertions, imports, if/Deli/else conditional blocks, bounded `repeat` and condition-controlled `while` loops, `break`/`continue`, list and string operations, event emission, sleep, basic object storage, bytecode compilation, and structured exception handling. The remaining reserved commands are part of the forward-compatible grammar and fail explicitly until implemented.
 
 ## 17 standard libraries
 
@@ -27,6 +27,23 @@ python -m khaton run examples/hello.kh
 ```bash
 python -m khaton compile examples/hello.kh -o hello.kbc
 python -m khaton exec hello.kbc
+```
+
+Validate a source file without executing it:
+
+```bash
+python -m khaton check examples/hello.kh
+```
+
+Collection helpers use a target-first syntax. `range` creates an integer list, while
+`append`, `len`, `index`, `contains`, `join`, and `type_of` make small scripts easier
+to write:
+
+```khaton
+range values 1 4
+append values values 4
+join message "," values
+printty message
 ```
 
 The bytecode format is versioned JSON for transparency and debugging. It is not intended to be treated as a security boundary for untrusted files.

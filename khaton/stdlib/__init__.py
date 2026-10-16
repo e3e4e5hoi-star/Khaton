@@ -4,10 +4,10 @@ import json, math, os, random, statistics, time, hashlib, re, pathlib, datetime,
 LIBRARIES = ('math','stats','strings','collections','json','os','path','time','random','crypto','regex','datetime','uuid','io','net','data','system')
 def load_library(name: str):
     libs = {
-        'math': {'pi': math.pi, 'sqrt': math.sqrt, 'sin': math.sin, 'cos': math.cos},
+        'math': {'pi': math.pi, 'e': math.e, 'sqrt': math.sqrt, 'sin': math.sin, 'cos': math.cos, 'floor': math.floor, 'ceil': math.ceil, 'abs': abs},
         'stats': {'mean': statistics.mean, 'median': statistics.median},
-        'strings': {'upper': str.upper, 'lower': str.lower, 'strip': str.strip},
-        'collections': {'list': list, 'tuple': tuple},
+        'strings': {'upper': str.upper, 'lower': str.lower, 'strip': str.strip, 'split': str.split, 'replace': str.replace},
+        'collections': {'list': list, 'tuple': tuple, 'dict': dict},
         'json': {'encode': json.dumps, 'decode': json.loads},
         'os': {'cwd': os.getcwd, 'env': dict(os.environ)},
         'path': {'join': os.path.join, 'exists': os.path.exists},
